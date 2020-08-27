@@ -1,0 +1,36 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+{% if category %}
+<h2>Active listings in {{ category }}</h2>
+{% else %}
+<h2>Active listings</h2>
+{% endif %}
+
+<ul class="list-group">
+    {% for listing in listings %}
+    {% if listing.0.active %}
+    <li class="list-group-item d-flex justify-content-around">
+        <div>
+            {% if listing.0.image %}
+            <img width="300" src="{{ listing.0.image }}" alt="{{ listing.0.title }} photo">
+            {% else %}
+            <img width="300"
+                src="https://image.shutterstock.com/image-vector/no-image-available-icon-template-260nw-1036735675.jpg"
+                alt="No photo available">
+            {% endif %}
+        </div>
+        <div>
+            <h3><a href="{% url 'listing' listing.0.id %}">{{ listing.0.title }}</a></h3>
+            <p>{{ listing.0.description }}</p>
+            <strong>Current bid: {{ listing.1 }}</strong>
+            <small class="d-block">Created: {{ listing.0.date }}</small>
+        </div>
+    </li>
+    {% endif %}
+    {% empty %}
+    <li>No active listing.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

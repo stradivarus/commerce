@@ -1,0 +1,88 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h1>{{ listing.title }}</h1>
+<div class="container d-flex justify-content-between ml-0">
+    <div>
+
+        {% if listing.image %}
+        <img class="my-4" width="300" src="{{ listing.image }}" alt="{{ listing.title }} photo">
+        {% else %}
+        <img class="my-4" width="300"
+            src="https://image.shutterstock.com/image-vector/no-image-available-icon-template-260nw-1036735675.jpg"
+            alt="No photo available">
+        {% endif %}
+
+        <p>{{ listing.description }}</p>
+        <small class="d-block">Created: {{ listing.date }}</small>
+    </div>
+
+    <div>
+        <strong class="mb-2 d-flex justify-content-between"><span>Current bid: {{ current_bid }}</span><span>Start bid:
+                {{ listing.start_bid }}</span></strong>
+
+        {% if not listing.active %}
+        <div class="alert alert-danger">Auction closed.</div>
+        {% if user == winner %}
+        <div class="alert alert-success">You are the winner of this auction!</div>
+        {% endif %}
+        {% endif %}
+
+        {% if user.is_authenticated and listing.active %}
+        {% if message %}
+        <div class="alert alert-warning">{{ message }}</div>
+        {% endif %}
+        <form action="{% url 'listing' listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input class="form-control" type="text" name="new-bid" pattern="[+-]?([0-9]*[.])?[0-9]{2}">
+            </div>
+            <button class="btn btn-primary btn-block">Bid now</button>
+        </form>
+
+        <div class="my-4">
+            <form action="{% url 'listing' listing.id %}" method="POST">
+                {% csrf_token %}
+                {% if watched %}
+                <button class="btn btn-warning btn-block" name="wtchlst" value="remove">Remove from Watchlist</button>
+                {% else %}
+                <button class="btn btn-success btn-block" name="wtchlst" value="add">Add to Watchlist</button>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if user == listing.author %}
+        <form action="{% url 'listing' listing.id %}" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-block" name="close">Close Auction</button>
+        </form>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    
+    <div class="w-25">
+        <h3 class="mt-0 mb-4">Comments</h3>
+        <ul class="list-group mb-4 w-100">
+            {% for comment in comments %}
+            <li class="list-group-item w-100">
+                <p>{{ comment.content }}</p>
+                <small>comment by <strong>{{ comment.user }}</strong></small>
+            </li>
+            {% empty %}
+            <li class="list-group-item">No comments yet.</li>
+            {% endfor %}
+        </ul>
+
+        {% if user.is_authenticated %}
+        <form action="{% url 'listing' listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="comment" class="form-control" required>
+                <input type="submit" value="Add comment" class="btn btn-secondary btn-block">
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
